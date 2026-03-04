@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <title>Realtime Monitoring Dashboard v1.0.3</title>
+
+  <meta charset="UTF-8">
+  <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+  <!--html need include, load load the STOMP library!-->
+  <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+
+  <!--With 1.0.3 the browser downloads fresh dashboard.js file instead of using from cache old version.-->
+  <!--  <script th:src="@{/dashboard.js(v='1.0.3')}" defer></script> -->
+</head>
+<title>WebSocket Toggle</title>
+
+<body>
+
+  <fieldset id="wsFieldset" th:classappend="${wsConnected} ? 'on pressed' : 'off'">
+    <legend id="wsLegend" th:text="${wsConnected} ? 'websocket-on' : 'websocket-off'"></legend>
+    <button id="wsButton" th:text="${wsConnected} ? 'Disconnect' : 'Connect'"></button>
+  </fieldset>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+
+</html>
