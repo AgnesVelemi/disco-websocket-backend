@@ -19,12 +19,22 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
         connected.set(true);
-        System.out.println("WebSocket connected");
+        System.out.println("WebSocket connected with "
+                + "sessionid: " + session.getId()
+                + ", uri: " + session.getUri()
+                + ", localaddr: " + session.getLocalAddress()
+                + ", remoteAddr: " + session.getRemoteAddress()
+        + ".");
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         connected.set(false);
-        System.out.println("WebSocket disconnected");
+        System.out.println("WebSocket disconnected with "
+                + "sessionid: " + session.getId()
+                + ", uri: " + session.getUri()
+                + ", localaddr: " + session.getLocalAddress()
+                + ", remoteAddr: " + session.getRemoteAddress()
+                + ".");
     }
 }
