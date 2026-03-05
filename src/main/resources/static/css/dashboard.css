@@ -1,7 +1,18 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
   font-family: Arial, sans-serif;
   background-color: #f4f6f8;
   padding: 40px;
+}
+
+header {
+    background-color: #5e6366;
+    color: white;
+    padding: 20px;
+    text-align: center;
 }
 
 fieldset {

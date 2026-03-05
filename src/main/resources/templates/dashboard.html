@@ -12,11 +12,30 @@
     <script th:src="@{/js/dashboard.js(v='1.0.3')}" defer></script>
 </head>
 <body>
+<header>
+    <div>
+        <h1>Monitoring Dashboard for portfolio-backend</h1>
+
+        <h2 id="serverStartTime" th:text="'Server is up since ' + ${serverStartTime}" class="metric-value">
+            N/A
+        </h2>
+        <p>Server Time Zone: <span th:text="${serverTimeZone}">00:00</span></p>
+    </div>
+    <div>
+        <h4>Environment: <span class="badge" th:text="${environment}">DEV (html)</span></h4>
+        <h4>Logged User: <strong th:text="${username}">Guest (html)</strong></h4>
+        <h4>version 1.0.1.0 (2026.Mar.15.)</h4>
+    </div>
+</header>
   <fieldset id="wsFieldset" th:classappend="${wsConnected} ? 'pressed' : 'off'">
     <legend id="wsLegend" th:text="${wsConnected} ? 'websocket-on' : 'websocket-off'"></legend>
     <button id="wsButton" th:text="${wsConnected} ? 'Disconnect' : 'Connect'"></button>
   </fieldset>
 
+
+<footer>
+    <p>&copy; 2026 All rights reserved (developed by Agnes Velemi)</p>
+</footer>
   <!--<script src="/js/dashboard.js"></script> -->
 </body>
 
