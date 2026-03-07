@@ -1,6 +1,8 @@
 let socket = null;
 const button = document.getElementById("wsButton");
 const legend = document.getElementById("wsLegend");
+const btnSendWSMsg = document.getElementById("sendBtn");
+const messageInput = document.getElementById("messageInput");
 
 // Set initial button color
  button.style.backgroundColor = "royalblue";
@@ -14,12 +16,21 @@ function updateUI(isConnected) {
         button.style.backgroundColor = "peru"; // Change to peru color
         button.classList.remove("off");
         button.classList.add("pressed");
+        btnSendWSMsg.style.backgroundColor = "royalblue";
+        btnSendWSMsg.style.color = "black";
+        messageInput.disabled = false;
+        btnSendWSMsg.disabled = false;
+
     } else {
         legend.textContent = "websocket-off";
         button.textContent = "Connect";
         button.style.backgroundColor = "royalblue"; // Change back to royalblue
+        btnSendWSMsg.style.backgroundColor = "lightgrey";
         button.classList.remove("pressed");
         button.classList.add("off");
+        btnSendWSMsg.style.color = "darkgrey";
+        messageInput.disabled = true;
+        btnSendWSMsg.disabled = true;
     }
 }
 // WebSocket setup
@@ -41,9 +52,10 @@ function connect() {
 
      // Handle incoming messages it needs to be set up each time a new WebSocket connection (tied to it) is established
      socket.onmessage = function (event) {
-        const message = JSON.parse(event.data);
-         // Update the UI with the message
-         console.log("message: ", message);
+       updateDashboard(event.data);
+
+       const message = JSON.parse(event.data);
+       console.log("message: ", message);
      };
 }
 
@@ -66,3 +78,37 @@ button.addEventListener("click", function () { // onto button click do these thi
 document.addEventListener("DOMContentLoaded", () => {
     updateUI(false); // here if you want to set the UI to "off" on load
 });
+
+// END connnect
+//////////////////////////////////////////////////////////////////////////
+// START of ws-message
+
+    // Üzenetküldő gomb eseménykezelője
+    document.getElementById("sendWSMessageFromBackend").addEventListener("click", function() {
+        const messageInput = document.getElementById("messageInput");
+        const message = messageInput.value;
+        console.log(message);
+
+        if (message) {
+            if (socket.readyState === WebSocket.OPEN) {
+                // Üzenet küldése a WebSocket-en
+                socket.send(message);
+                displayMessage(`BE: ${message} | ${getCurrentTime()}`); // Üzenet megjelenítése a kiírás szerint
+                messageInput.value = ""; // Bemenet törlése
+                System.out.println("bármi");
+            } else {
+                console.warn("WebSocket is not open. Current state: " + socket.readyState);
+                alert("WebSocket is not open!");
+            }
+        }
+    });
+
+    function updateDashboard(data) {
+        displayMessage(data);
+    }
+
+    // Üzenet megjelenítése a dashboardon
+    function displayMessage(formattedMessage) {
+        const messageContainer = document.getElementById("messageContainer");
+        messageContainer.innerHTML += `<p>${formattedMessage}</p>`;
+    }
