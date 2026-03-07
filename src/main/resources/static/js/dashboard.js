@@ -74,9 +74,9 @@ button.addEventListener("click", function () { // onto button click do these thi
   }
 });
 
-// Optionally: Automatically connect when page loads 1st time, or F5 refresh
+// 1st loaded, F5 refresh of the page
 document.addEventListener("DOMContentLoaded", () => {
-    updateUI(false); // here if you want to set the UI to "off" on load
+    updateUI(false);
 });
 
 // END connnect
@@ -84,8 +84,9 @@ document.addEventListener("DOMContentLoaded", () => {
 // START of ws-message
 
     // Üzenetküldő gomb eseménykezelője
-    document.getElementById("sendWSMessageFromBackend").addEventListener("click", function() {
-        const messageInput = document.getElementById("messageInput");
+    btnSendWSMsg.addEventListener("click", function() {
+      console.log("Button clicked!"); // Add this line
+    console.log(btnSendWSMsg.disabled);
         const message = messageInput.value;
         console.log(message);
 
@@ -107,8 +108,15 @@ document.addEventListener("DOMContentLoaded", () => {
         displayMessage(data);
     }
 
+// Aktuális idő és dátum lekérdezése
+function getCurrentTime() {
+    const now = new Date();
+    return now.toLocaleString('hu-HU', { timeZone: 'Europe/Budapest', hour12: false });
+}
+
     // Üzenet megjelenítése a dashboardon
     function displayMessage(formattedMessage) {
         const messageContainer = document.getElementById("messageContainer");
-        messageContainer.innerHTML += `<p>${formattedMessage}</p>`;
+        // messageContainer.innerHTML += `<p>${formattedMessage}</p>`;
+        messageContainer.insertAdjacentHTML('afterbegin', `<p>${formattedMessage}</p>`);
     }
