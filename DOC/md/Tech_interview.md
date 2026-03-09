@@ -131,3 +131,10 @@ public class MessageController {
   * translation, rotation, scaling, and skewing.
 * The translateY() function is used to move an element along the Y-axis (- is up and + is down), 
 * as if the button is being physically pressed down
+
+### insertAdjacentHTML js method
+* `<div id="messageContainer" th:utext="${messages}">`
+* messageContainer.insertAdjacentHTML('afterbegin', `<p>${formattedMessage}</p>`);
+* insertAdjacentHTML('afterbegin', ...): This method allows you to insert HTML at a specified position in the DOM. 
+* The 'afterbegin' position indicates that the new message should be inserted as the first child of the messageContainer, 
+* effectively making it appear above any existing messages.

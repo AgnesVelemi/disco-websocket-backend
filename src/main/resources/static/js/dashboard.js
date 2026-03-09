@@ -3,12 +3,23 @@ const button = document.getElementById("wsButton");
 const legend = document.getElementById("wsLegend");
 const btnSendWSMsg = document.getElementById("sendBtn");
 const messageInput = document.getElementById("messageInput");
+const messageContainer = document.getElementById("messageContainer");
 
-// Set initial button color
- button.style.backgroundColor = "royalblue";
+let messageCount = 0; // Count of messages
+let messages = []; // Array to hold messages
 
+button.style.backgroundColor = "royalblue"; // Set initial button color
 
-// Function to update UI based on connection state
+document.addEventListener("DOMContentLoaded", () => { // First webpage load or F5 refresh
+    updateUI(false);
+        // Add event listener for Enter key only after the DOM is fully loaded
+        messageInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                sendWSMessageFromBackend();
+            }
+        });
+});
+
 function updateUI(isConnected) {
     if (isConnected) {
         legend.textContent = "websocket-on";
@@ -20,7 +31,6 @@ function updateUI(isConnected) {
         btnSendWSMsg.style.color = "black";
         messageInput.disabled = false;
         btnSendWSMsg.disabled = false;
-
     } else {
         legend.textContent = "websocket-off";
         button.textContent = "Connect";
@@ -37,26 +47,27 @@ function updateUI(isConnected) {
 function connect() {
   socket = new WebSocket("ws://localhost:8080/ws/dashboard");
 
-     socket.onopen = function () { // Websocket onopen event happened --> do things logic
-       updateUI(true); // Update UI on successful connection
-           };
+  socket.onopen = function () { // Update UI on successful connection
+    console.log("WebSocket connection established.");
+    updateUI(true);
+  };
 
-     // Websocket onclose logic need here to tie/setup to the websocket what will should happen after/onto "socket.close();"
-     socket.onclose = function () {
-       updateUI(false); // Update UI on disconnection
-     };
+  socket.onclose = function () {
+    console.log("WebSocket connection closed.");
+    updateUI(false); // Update UI on disconnection
+  };
 
-     socket.onerror = function (error) {
-       console.error("WebSocket Error: ", error);
-     };
+  socket.onerror = function (error) {
+    console.error("WebSocket Error: ", error);
+  };
 
-     // Handle incoming messages it needs to be set up each time a new WebSocket connection (tied to it) is established
-     socket.onmessage = function (event) {
-       updateDashboard(event.data);
+  socket.onmessage = function (event) {
+    handleIncomingMessage(event.data);
 
-       const message = JSON.parse(event.data);
-       console.log("message: ", message);
-     };
+    //   updateDashboard(event.data);
+    //   const message = JSON.parse(event.data);
+    //   console.log("message: ", message);
+  };
 }
 
 function disconnect() {
@@ -74,49 +85,92 @@ button.addEventListener("click", function () { // onto button click do these thi
   }
 });
 
-// 1st loaded, F5 refresh of the page
-document.addEventListener("DOMContentLoaded", () => {
-    updateUI(false);
-});
 
-// END connnect
-//////////////////////////////////////////////////////////////////////////
-// START of ws-message
 
-    // Üzenetküldő gomb eseménykezelője
-    btnSendWSMsg.addEventListener("click", function() {
-      console.log("Button clicked!"); // Add this line
-    console.log(btnSendWSMsg.disabled);
-        const message = messageInput.value;
-        console.log(message);
 
-        if (message) {
-            if (socket.readyState === WebSocket.OPEN) {
-                // Üzenet küldése a WebSocket-en
-                socket.send(message);
-                displayMessage(`BE: ${message} | ${getCurrentTime()}`); // Üzenet megjelenítése a kiírás szerint
-                messageInput.value = ""; // Bemenet törlése
-                System.out.println("bármi");
-            } else {
-                console.warn("WebSocket is not open. Current state: " + socket.readyState);
-                alert("WebSocket is not open!");
-            }
-        }
-    });
+// Event listener for incoming messages from the WebSocket
+socket.addEventListener("message", function(event) {
+    console.log("Message received from server:", event.data); // Check the raw data
 
-    function updateDashboard(data) {
-        displayMessage(data);
+    try {
+        // Parse the received JSON string. Make sure event.data is a valid JSON string.
+        const messageData = JSON.parse(event.data);
+
+        // Format the message for display
+        const formattedMessage = formatMessage(messageData);
+
+        // Display the formatted message in messageContainer
+        displayMessage(formattedMessage);
+    } catch (error) {
+        console.error("Error parsing message:", error);
     }
+});
+//btnSendWSMsg.addEventListener("click", sendWSMessageFromBackend); // Üzenetküldő gomb eseménykezelője
+function sendWSMessageFromBackend() { // Üzenetküldő gomb eseménykezelője
+    console.log("Button clicked!");
+    const message = messageInput.value.trim();
+    console.log("Taken typed BE message: " + message);
 
-// Aktuális idő és dátum lekérdezése
-function getCurrentTime() {
-    const now = new Date();
-    return now.toLocaleString('hu-HU', { timeZone: 'Europe/Budapest', hour12: false });
+     if (message && socket.readyState === WebSocket.OPEN) {
+        // Create the JSON object
+        const messageData = {
+            sentFrom: "BE",
+            sentFromIP: "192.168.1.10:8080", // Replace with the actual IP if necessary
+            message: message,
+            timestamp: new Date().toLocaleString('en-US', { timeZone: 'CET', hour12: false }),
+            sentFromTimezone: "CET"
+        };
+
+        socket.send(JSON.stringify(messageData)); // Send JSON object to server
+
+        // messageCount++;
+        // const formattedMessage = formatMessage(messageData);
+        // messages.push(formattedMessage);  // Store formatted message
+        // displayMessage(formattedMessage); // Display the latest message
+        // Check if we need to log and reset
+        //  if (messageCount === 10) {  logAndResetMessages(); }
+
+        messageInput.value = ""; // Clear the input field after sending
+          console.log("Message sent to socket:", messageData);
+
+     } else {
+         console.warn("WebSocket is not open. Current state: " + socket.readyState);
+         alert("WebSocket is not open!");
+     }
 }
 
-    // Üzenet megjelenítése a dashboardon
-    function displayMessage(formattedMessage) {
-        const messageContainer = document.getElementById("messageContainer");
-        // messageContainer.innerHTML += `<p>${formattedMessage}</p>`;
-        messageContainer.insertAdjacentHTML('afterbegin', `<p>${formattedMessage}</p>`);
+messageInput.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        sendWSMessageFromBackend();
     }
+});
+
+function handleIncomingMessage(data) {
+    console.log("Message received from server:", data);
+
+    try {
+        const messageData = JSON.parse(data);
+        const formattedMessage = formatMessage(messageData);
+        displayMessage(formattedMessage);
+    } catch (error) {
+        console.error("Error parsing message:", error);
+    }
+}
+
+function formatMessage(data) { // to format the message for display
+    return `${data.sentFrom}: ${data.message} | ${data.timestamp} ${data.sentFromTimezone} ip: ${data.sentFromIP}`;
+}
+
+function displayMessage(formattedMessage) {
+  // messageContainer.innerHTML += `<p>${formattedMessage}</p>`;
+  messageContainer.insertAdjacentHTML('afterbegin', `<p>${formattedMessage}</p>`);
+}
+function updateDashboard(data) {
+  displayMessage(data);
+}
+
+function getCurrentTime() {
+  const now = new Date();
+  return now.toLocaleString('hu-HU', { timeZone: 'Europe/Budapest', hour12: false });
+}
+

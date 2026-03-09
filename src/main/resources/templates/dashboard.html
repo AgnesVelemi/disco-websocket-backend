@@ -9,41 +9,41 @@
   <!--html need include, load load the STOMP library!
    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
    With 1.0.3 the browser downloads fresh dashboard.js file instead of using from cache old version.-->
-    <script th:src="@{/js/dashboard.js(v='1.0.3')}" defer></script>
-</head>
-<body>
-<header>
-    <div>
-        <h1>Monitoring Dashboard for portfolio-backend</h1>
-        <p id="serverStartTime" th:text="'Server is up since ' + ${serverStartTime}" class="metric-value">N/A</p>
-        <p>Server Time Zone: <span th:text="${serverTimeZone}">00:00</span></p>
-    </div>
-    <div>
-        <p style="margin-top:70px;">Environment: <span class="badge" th:text="${environment}">DEV (html)</span></p>
-        <p>Logged User: <strong th:text="${username}">Guest (html)</strong></p>
+    <!-- <script th:src="@{/js/dashboard.js(v='1.0.3')}" defer></script>-->
+ </head>
+ <body>
+ <header>
+     <div>
+         <h1>Monitoring Dashboard for portfolio-backend</h1>
+         <p id="serverStartTime" th:text="'Server is up since ' + ${serverStartTime}" class="metric-value">N/A</p>
+         <p>Server Time Zone: <span th:text="${serverTimeZone}">00:00</span></p>
+     </div>
+     <div>
+         <p style="margin-top:70px;">Environment: <span class="badge" th:text="${environment}">DEV (html)</span></p>
+         <p>Logged User: <strong th:text="${username}">Guest (html)</strong></p>
 
-    </div>
-</header>
+     </div>
+ </header>
 
-<section class="controls-container">
-  <h2>Locally WebSocket</h2>
-    <div class="control-group">
-  <fieldset id="wsFieldset" th:classappend="${wsConnected} ? 'pressed' : 'off'">
-    <legend id="wsLegend" th:text="${wsConnected} ? 'websocket-on' : 'websocket-off'"></legend>
-    <button id="wsButton" th:text="${wsConnected} ? 'Disconnect' : 'Connect'"></button>
-  </fieldset>
-    </div>
-    <div class="control-group">
-        <input type="text" id="messageInput" placeholder="Type a message..." class="input-field">
-        <button id="sendBtn" onclick="sendWSMessageFromBackend()" class="btn btn-send">Send Message</button>
-    </div>
-</section>
-<section class="controls-container">
-    <div id="dashboard">
-        <h2>Received Websocket Messages</h2>
-        <h3 style="color:darkgrey">Max 10 recent messages:</h3>
-        <div id="messageContainer" th:utext="${messages}">
-            <!-- Üzenetek dinamikusan töltődnek be -->
+ <section class="controls-container">
+   <h2>Locally WebSocket</h2>
+     <div class="control-group">
+   <fieldset id="wsFieldset" th:classappend="${wsConnected} ? 'pressed' : 'off'">
+     <legend id="wsLegend" th:text="${wsConnected} ? 'websocket-on' : 'websocket-off'"></legend>
+     <button id="wsButton" th:text="${wsConnected} ? 'Disconnect' : 'Connect'"></button>
+   </fieldset>
+     </div>
+     <div class="control-group">
+         <input type="text" id="messageInput" placeholder="Type a message..." class="input-field">
+         <button id="sendBtn" onclick="sendWSMessageFromBackend()" class="btn btn-send">Send Message</button>
+     </div>
+ </section>
+ <section class="controls-container">
+     <div id="dashboard">
+         <h2>Received Websocket Messages</h2>
+         <h3 style="color:darkgrey">Max 10 recent messages:</h3>
+         <div id="messageContainer" th:utext="${messages}">
+             <!-- Üzenetek dinamikusan töltődnek be -->
         </div>
     </div>
 </section>
@@ -62,7 +62,8 @@
     <p>version 1.0.1.0 (2026.Mar.15.)</p>
     <p>&copy; 2026 All rights reserved (developed by Agnes Velemi)</p>
 </footer>
-  <!--<script src="/js/dashboard.js"></script> -->
+<!--  <script src="/js/dashboard.js"></script> -->
+<script th:src="@{/js/dashboard.js(v='1.0.3')}"></script>
 </body>
 
 </html>

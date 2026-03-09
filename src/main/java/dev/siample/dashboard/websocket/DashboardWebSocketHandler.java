@@ -1,7 +1,9 @@
 package dev.siample.dashboard.websocket;
 
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
@@ -37,4 +39,15 @@ public class DashboardWebSocketHandler extends TextWebSocketHandler {
                 + ", remoteAddr: " + session.getRemoteAddress()
                 + ".");
     }
+
+
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        // Log the received message
+        System.out.println("Message payload: " + message.getPayload());
+
+        // The response to the client:
+        session.sendMessage(new TextMessage(message.getPayload()));
+    }
+
 }
