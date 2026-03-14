@@ -1,13 +1,14 @@
 package dev.siample.dashboard.websocket;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.config.annotation.*;
 
 @Configuration
 @EnableWebSocket
-public class WebSocketConfig implements WebSocketConfigurer {
+@EnableWebSocketMessageBroker  // Enable STOMP
+// public class WebSocketConfig implements WebSocketConfigurer {
+public class WebSocketConfig implements WebSocketConfigurer, WebSocketMessageBrokerConfigurer {
 
     private final DashboardWebSocketHandler handler;
 
@@ -25,8 +26,23 @@ public class WebSocketConfig implements WebSocketConfigurer {
      * @param registry
      */
     @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) { // for local websocket client+server
         registry.addHandler(handler, "/ws/dashboard")
                 .setAllowedOrigins("*");
+    }
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) { // for STOMP over websocket server
+        // Register STOMP endpoint
+        registry.addEndpoint("/ws/stomp") // STOMP endpoint
+                .setAllowedOrigins("http://localhost:4200", "http://localhost:1025", "http://localhost:8080", "*");
+               // .withSockJS(); // Optional, for SockJS fallback support
+    }
+
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry config) { // for STOMP over websocket server
+        // Enable simple broker
+        config.enableSimpleBroker("/topic"); // For messaging for subscribed ws-clients
+        config.setApplicationDestinationPrefixes("/app"); // For sending messages by clients to /app/<controller_endpoint>
     }
 }

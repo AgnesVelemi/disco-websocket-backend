@@ -20,11 +20,10 @@ public class DashboardStatusDto {
 
     private int connectedClients;
     private long totalMessages;
-    private final ZonedDateTime serverStartTime = ZonedDateTime.now();
-    private final String serverStartTimeAsString = serverStartTime.format(DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss", Locale.ENGLISH));
-    private final String TheTimeZones = serverStartTime.format(DateTimeFormatter.ofPattern("z", Locale.ENGLISH))
+    private  ZonedDateTime serverStartTime = ZonedDateTime.now();
+    private  String serverStartTimeAsString = serverStartTime.format(DateTimeFormatter.ofPattern("yyyy-MMM-dd HH:mm:ss", Locale.ENGLISH));
+    private  String TheTimeZones = serverStartTime.format(DateTimeFormatter.ofPattern("z", Locale.ENGLISH))
         + " = " + serverStartTime.format(DateTimeFormatter.ofPattern("zzzz", Locale.ENGLISH));
     private LocalDateTime timestamp;
-
 
 }
