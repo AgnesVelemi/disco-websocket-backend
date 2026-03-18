@@ -46,17 +46,18 @@ function connectStomp() {
     stompClient.subscribe("/topic/greetings", function (message) {
       const messageData = JSON.parse(message.body);
       console.log("Received from STOMP:", messageData);
-      
+
       // Transform incoming STOMP data to the standard dashboard format
       const transformedData = {
         sentFrom: messageData.clientType === 'frontend' ? 'FE' : messageData.clientType,
         sentFromIP: "192.168.1.10:8080", // Hardcoded as per requirement
         outMessage: messageData.outMessage,
-        timestamp: new Date(messageData.timestamp).toLocaleString('en-US', { hour12: false }), // Format to '3/18/2026, 08:13:19'
+        timestamp: formatTimestamp(messageData.timestamp), // Unified format: '2026.03.18. 08:13:19'
         sentFromTimezone: "CET" // Hardcoded as per requirement
       };
 
       // Store in global array (raw Message-copy)
+      transformedData.arrivalNumber = ++messageCount;
       messages.push(transformedData);
       console.log("Stored in global messages array:", transformedData);
 
@@ -156,8 +157,7 @@ function sendWSMessageFromBackend() { // Üzenetküldő gomb eseménykezelője
       sentFrom: "BE",
       sentFromIP: "192.168.1.10:8080", // Replace with the actual IP if necessary
       outMessage: message,
-      // timestamp: new Date().toLocaleString('en-US', { timeZone: 'CET', hour12: false }),
-      timestamp: new Date().toLocaleString('hu-HU', { timeZone: 'CET', hour12: false }),
+      timestamp: formatTimestamp(),
       sentFromTimezone: "CET"
     };
 
@@ -196,8 +196,9 @@ function handleIncomingMessage(data) { // itt tartok
 
   try {
     const messageData = JSON.parse(data);
-    
+
     // Store in global array (raw Message-copy)
+    messageData.arrivalNumber = ++messageCount;
     messages.push(messageData);
     console.log("Stored in global messages array:", messageData);
 
@@ -209,7 +210,7 @@ function handleIncomingMessage(data) { // itt tartok
 }
 
 function formatMessage(data) { // to format the message for display
-  return `${data.sentFrom}: ${data.outMessage} | ${data.timestamp} ${data.sentFromTimezone} ip: ${data.sentFromIP}`;
+  return `[${data.arrivalNumber}] ${data.sentFrom}: ${data.sentFromTimezone}:${data.timestamp}  ip:${data.sentFromIP} <b>| message: ${data.outMessage}</b>`;
 }
 
 function displayMessage(formattedMessage) {
@@ -220,9 +221,22 @@ function updateDashboard(data) {
   displayMessage(data);
 }
 
-function getCurrentTime() {
-  const now = new Date();
-  return now.toLocaleString('hu-HU', { timeZone: 'Europe/Budapest', hour12: false });
+
+/**
+ * Formats a date object or timestamp string/number into the desired dashboard format:
+ * "YYYY.MM.DD. HH:mm:ss" (e.g., 2026.03.18. 22:25:37)
+ * @param {Date|string|number} [date=new Date()] 
+ * @returns {string}
+ */
+function formatTimestamp(date = new Date()) {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const seconds = String(d.getSeconds()).padStart(2, '0');
+  return `${year}.${month}.${day}. ${hours}:${minutes}:${seconds}`;
 }
 
 // Function to render all messages from the global array into the container
