@@ -7,14 +7,14 @@ const messageInput = document.getElementById("messageInput");
 const messageContainer = document.getElementById("messageContainer");
 
 let messageCount = 0; // Count of messages
-let messages = []; // Array to hold messages
+let messages = []; // Global array for all received messages (WS and STOMP)
 
 button.style.backgroundColor = "royalblue"; // Set initial button color
 
 document.addEventListener("DOMContentLoaded", () => { // First webpage load or F5 refresh
   updateUI(false);
   connectStomp(); // Establish STOMP connection once on page load
-  
+
   // Add event listener for Enter key only after the DOM is fully loaded
   messageInput.addEventListener("keypress", function (event) {
     if (event.key === "Enter") {
@@ -46,11 +46,26 @@ function connectStomp() {
     stompClient.subscribe("/topic/greetings", function (message) {
       const messageData = JSON.parse(message.body);
       console.log("Received from STOMP:", messageData);
-      console.log("Payload:", messageData.outMessage); // Kiírja a payload-ot
-      console.log("Client Type:", messageData.clientType); // Kiírja a client type-ot
+      
+      // Transform incoming STOMP data to the standard dashboard format
+      const transformedData = {
+        sentFrom: messageData.clientType === 'frontend' ? 'FE' : messageData.clientType,
+        sentFromIP: "192.168.1.10:8080", // Hardcoded as per requirement
+        outMessage: messageData.outMessage,
+        timestamp: new Date(messageData.timestamp).toLocaleString('en-US', { hour12: false }), // Format to '3/18/2026, 08:13:19'
+        sentFromTimezone: "CET" // Hardcoded as per requirement
+      };
+
+      // Store in global array (raw Message-copy)
+      messages.push(transformedData);
+      console.log("Stored in global messages array:", transformedData);
+
+      // Display in messageContainer using existing logic
+      const formattedMessage = formatMessage(transformedData);
+      displayMessage(formattedMessage);
 
       // Dispatch a custom event for other parts of the app to react to
-      window.dispatchEvent(new CustomEvent('stompMessageReceived', { detail: messageData }));
+      window.dispatchEvent(new CustomEvent('stompMessageReceived', { detail: transformedData }));
     });
   };
 
@@ -140,8 +155,9 @@ function sendWSMessageFromBackend() { // Üzenetküldő gomb eseménykezelője
     const messageData = {
       sentFrom: "BE",
       sentFromIP: "192.168.1.10:8080", // Replace with the actual IP if necessary
-      message: message,
-      timestamp: new Date().toLocaleString('en-US', { timeZone: 'CET', hour12: false }),
+      outMessage: message,
+      // timestamp: new Date().toLocaleString('en-US', { timeZone: 'CET', hour12: false }),
+      timestamp: new Date().toLocaleString('hu-HU', { timeZone: 'CET', hour12: false }),
       sentFromTimezone: "CET"
     };
 
@@ -170,7 +186,7 @@ messageInput.addEventListener("keypress", function (event) {
 });
 
 function handleIncomingMessage(data) { // itt tartok
-  console.log("Message received from server:", data);
+  console.log("Message received from local raw WebSocket server:", data);
   /*Message received from server: 
        {"sentFrom":"BE",
         "sentFromIP":"192.168.1.10:8080",
@@ -180,6 +196,11 @@ function handleIncomingMessage(data) { // itt tartok
 
   try {
     const messageData = JSON.parse(data);
+    
+    // Store in global array (raw Message-copy)
+    messages.push(messageData);
+    console.log("Stored in global messages array:", messageData);
+
     const formattedMessage = formatMessage(messageData);
     displayMessage(formattedMessage);
   } catch (error) {
@@ -188,7 +209,7 @@ function handleIncomingMessage(data) { // itt tartok
 }
 
 function formatMessage(data) { // to format the message for display
-  return `${data.sentFrom}: ${data.message} | ${data.timestamp} ${data.sentFromTimezone} ip: ${data.sentFromIP}`;
+  return `${data.sentFrom}: ${data.outMessage} | ${data.timestamp} ${data.sentFromTimezone} ip: ${data.sentFromIP}`;
 }
 
 function displayMessage(formattedMessage) {
@@ -202,5 +223,14 @@ function updateDashboard(data) {
 function getCurrentTime() {
   const now = new Date();
   return now.toLocaleString('hu-HU', { timeZone: 'Europe/Budapest', hour12: false });
+}
+
+// Function to render all messages from the global array into the container
+function renderMessages() {
+  messageContainer.innerHTML = ""; // Clear existing
+  messages.forEach(msg => {
+    const formatted = formatMessage(msg);
+    displayMessage(formatted);
+  });
 }
 
