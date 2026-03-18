@@ -6,7 +6,7 @@
   <title>Realtime Monitoring Dashboard v1.0.3</title>
   <link rel="stylesheet" th:href="@{/css/dashboard.css}">
 
-  <!--html need include, load load the STOMP library!
+  <!--html need include, load load the STOMP library!-->
    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
    With 1.0.3 the browser downloads fresh dashboard.js file instead of using from cache old version.-->
     <!-- <script th:src="@{/js/dashboard.js(v='1.0.3')}" defer></script>-->
@@ -52,7 +52,7 @@
     <div id="dashboard">
         <h2>Archived Websocket Messages</h2>
         <h3  style="color:darkgrey">11...20 archived messages:</h3>
-        <div id="messageContainer" th:utext="${messages}">
+        <div id="archiveMessageContainer" th:utext="${messages}">
             <!-- Üzenetek dinamikusan töltődnek be -->
         </div>
     </div>
@@ -63,6 +63,7 @@
     <p>&copy; 2026 All rights reserved (developed by Agnes Velemi)</p>
 </footer>
 <!--  <script src="/js/dashboard.js"></script> -->
+ <script src="https://unpkg.com/@stomp/stompjs@7.0.0/bundles/stomp.min.js"></script>
 <script th:src="@{/js/dashboard.js(v='1.0.3')}"></script>
 </body>
 
