@@ -8,6 +8,8 @@ const messageContainer = document.getElementById("messageContainer");
 
 let messageCount = 0; // Count of messages
 let messages = []; // Global array for all received messages (WS and STOMP)
+let messagestoArchive = []; // Archive array for messages 1-10
+const archiveMessageContainer = document.getElementById("archiveMessageContainer");
 
 button.style.backgroundColor = "royalblue"; // Set initial button color
 
@@ -56,14 +58,19 @@ function connectStomp() {
         sentFromTimezone: "CET" // Hardcoded as per requirement
       };
 
+
       // Store in global array (raw Message-copy)
       transformedData.arrivalNumber = ++messageCount;
+      if (transformedData.arrivalNumber === 11) {
+        archiveMessages();
+        messageCount = 1;
+        transformedData.arrivalNumber = messageCount;
+      }
       messages.push(transformedData);
       console.log("Stored in global messages array:", transformedData);
 
       // Display in messageContainer using existing logic
-      const formattedMessage = formatMessage(transformedData);
-      displayMessage(formattedMessage);
+      renderMessages();
 
       // Dispatch a custom event for other parts of the app to react to
       window.dispatchEvent(new CustomEvent('stompMessageReceived', { detail: transformedData }));
@@ -197,13 +204,18 @@ function handleIncomingMessage(data) { // itt tartok
   try {
     const messageData = JSON.parse(data);
 
+
     // Store in global array (raw Message-copy)
     messageData.arrivalNumber = ++messageCount;
+    if (messageData.arrivalNumber === 11) {
+      archiveMessages();
+      messageCount = 1;
+      messageData.arrivalNumber = messageCount;
+    }
     messages.push(messageData);
     console.log("Stored in global messages array:", messageData);
 
-    const formattedMessage = formatMessage(messageData);
-    displayMessage(formattedMessage);
+    renderMessages();
   } catch (error) {
     console.error("Error parsing message:", error);
   }
@@ -245,6 +257,38 @@ function renderMessages() {
   messages.forEach(msg => {
     const formatted = formatMessage(msg);
     displayMessage(formatted);
+  });
+}
+
+function archiveMessages() {
+  console.log("Archiving messages 1-10...");
+  
+  // Create a copy of the 10 messages to archive
+  messagestoArchive = [...messages];
+  
+  // Send to backend via STOMP for terminal printing
+  if (stompClient && stompClient.connected) {
+    stompClient.publish({
+      destination: '/app/archive',
+      body: JSON.stringify(messagestoArchive)
+    });
+  } else {
+    console.warn("STOMP client not connected, cannot send archive to backend.");
+  }
+
+  // Clear main messages and container
+  messages = [];
+  messageContainer.innerHTML = "";
+  
+  // Render to archive container
+  renderArchiveMessages();
+}
+
+function renderArchiveMessages() {
+  archiveMessageContainer.innerHTML = ""; // Clear previous archive
+  messagestoArchive.forEach(msg => {
+    const formatted = formatMessage(msg);
+    archiveMessageContainer.insertAdjacentHTML('afterbegin', `<p>${formatted}</p>`);
   });
 }
 

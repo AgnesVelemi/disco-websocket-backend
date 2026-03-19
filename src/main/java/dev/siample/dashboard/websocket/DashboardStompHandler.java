@@ -65,4 +65,15 @@ public class DashboardStompHandler {
                 OffsetDateTime.now(),
                 clientType);
     }
+
+    @MessageMapping("/archive")
+    public void archiveMessages(@Payload List<ArchiveMessageDTO> archiveMessages) {
+        System.out.println("--- Archiving 10 messages ---");
+        for (ArchiveMessageDTO msg : archiveMessages) {
+            System.out.println("[" + msg.getArrivalNumber() + "] " + msg.getSentFrom() + ": " 
+                + msg.getSentFromTimezone() + ":" + msg.getTimestamp() + " ip:" + msg.getSentFromIP() 
+                + " | message: " + msg.getOutMessage());
+        }
+        System.out.println("--- End of Archive ---");
+    }
 }
